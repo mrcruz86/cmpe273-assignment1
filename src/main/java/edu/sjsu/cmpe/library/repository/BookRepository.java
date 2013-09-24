@@ -5,7 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.sjsu.cmpe.library.domain.Author;
 import edu.sjsu.cmpe.library.domain.Book;
+import edu.sjsu.cmpe.library.domain.Review;
 
 public class BookRepository implements BookRepositoryInterface {
     /** In-memory map to store books. (Key, Value) -> (ISBN, Book) */
@@ -40,8 +42,10 @@ public class BookRepository implements BookRepositoryInterface {
 	// Generate new ISBN
 	Long isbn = generateISBNKey();
 	newBook.setIsbn(isbn);
-	// TODO: create and associate other fields such as author
-
+	for(int i = 0;i < newBook.getAuthors().length; i++){
+		Author[] a = newBook.getAuthors();
+		a[i].setId(i+1);
+	}
 	// Finally, save the new book into the map
 	bookInMemoryMap.putIfAbsent(isbn, newBook);
 
@@ -57,5 +61,26 @@ public class BookRepository implements BookRepositoryInterface {
 		"ISBN was %s but expected greater than zero value", isbn);
 	return bookInMemoryMap.get(isbn);
     }
+    
+    @Override
+    public Book deleteBookByISBN(Long isbn) {
+	checkArgument(isbn > 0,
+		"ISBN was %s but expected greater than zero value", isbn);
+	return bookInMemoryMap.remove(isbn);
+    }
+    
+    @Override
+    public Review addReview(Long isbn, Review newReview) {
+    	checkArgument(isbn > 0,
+    			"ISBN was %s but expected greater than zero value", isbn);
+    	Book book = getBookByISBN(isbn);
+    	Review r = newReview;
+    	int i = book.getReviews().size();
+    	r.setId(i+1);
+    	book.getReviews().add(r);
+    	return r;
+    }
+    
+
 
 }
